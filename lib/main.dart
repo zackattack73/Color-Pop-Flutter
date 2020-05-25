@@ -1,103 +1,163 @@
 import 'package:flutter/material.dart';
+import 'package:color_pop/game_table.dart';
+import 'package:color_pop/block_table.dart';
+import 'package:bot_toast/bot_toast.dart';
 
 void main() => runApp(MyApp());
 
 class MyApp extends StatelessWidget {
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // Try running your application with "flutter run". You'll see the
-        // application has a blue toolbar. Then, without quitting the app, try
-        // changing the primarySwatch below to Colors.green and then invoke
-        // "hot reload" (press "r" in the console where you ran "flutter run",
-        // or simply save your changes to "hot reload" in a Flutter IDE).
-        // Notice that the counter didn't reset back to zero; the application
-        // is not restarted.
-        primarySwatch: Colors.blue,
-      ),
-      home: MyHomePage(title: 'Flutter Demo Home Page'),
-    );
+    return BotToastInit(
+        child: MaterialApp(
+      navigatorObservers: [BotToastNavigatorObserver()],
+      home: MyHomePage(),
+    ));
   }
 }
 
 class MyHomePage extends StatefulWidget {
-  MyHomePage({Key key, this.title}) : super(key: key);
-
-
-  final String title;
+  MyHomePage({Key key}) : super(key: key);
 
   @override
   _MyHomePageState createState() => _MyHomePageState();
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
+  GameTable gameTable;
+  bool onlyOne = false;
+  int milliseconds = 2000;
+  int animationMilliseconds = 200;
+  int animationReverseMilliseconds = 200;
 
-  void _incrementCounter() {
-    setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
-    });
+  @override
+  void initState() {
+    super.initState();
+    gameTable = GameTable(10, 10);
   }
 
   @override
   Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
     return Scaffold(
-      appBar: AppBar(
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
-        title: Text(widget.title),
-      ),
-      body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
-        child: Column(
-          // Column is also a layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Invoke "debug painting" (press "p" in the console, choose the
-          // "Toggle Debug Paint" action from the Flutter Inspector in Android
-          // Studio, or the "Toggle Debug Paint" command in Visual Studio Code)
-          // to see the wireframe for each widget.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Text(
-              'You have pushed the button this many times:',
-            ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.display1,
-            ),
-          ],
-        ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
+      body: Container(
+          color: Colors.grey,
+          child: Stack(
+            children: <Widget>[
+              Center(
+                child: buildGameTable(),
+              ),
+              new Positioned(
+                child: new Align(
+                    alignment: Alignment(0, 0.9),
+                    child: RaisedButton(
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18.0)),
+                      onPressed: () {
+                        setState(() {
+                          String result = gameTable.movement();
+                          handlePopup(result);
+                        });
+                      },
+                      child: Text(
+                        "Valider",
+                        style: TextStyle(color: Colors.white, fontSize: 20),
+                      ),
+                      color: Colors.green,
+                      padding: EdgeInsets.only(left: 40.0, right: 40.0, bottom: 10.0, top: 10.0),
+                    )),
+              ),
+              new Positioned(
+                  child: new Align(
+                alignment: Alignment(0, -0.9),
+                child: RaisedButton(
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18.0)),
+                    onPressed: () {},
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: <Widget>[
+                        SizedBox(height: 10),
+                        Container(
+                            width: 30,
+                            height: 30,
+                            margin: EdgeInsets.all(2),
+                            decoration: new BoxDecoration(
+                              color: gameTable.gameColor,
+                              shape: BoxShape.circle,
+                            )),
+                        Text(
+                          "Votre score : ${gameTable.score}",
+                          style: TextStyle(fontSize: 20),
+                        ),
+                        SizedBox(height: 10),
+                      ],
+                    )),
+              ))
+            ],
+          )),
     );
+  }
+
+  buildGameTable() {
+    List<Widget> listCol = List();
+    for (int row = 0; row < gameTable.countRow; row++) {
+      List<Widget> listRow = List();
+      for (int col = 0; col < gameTable.countCol; col++) {
+        listRow.add(buildBlockTableContainer(row, col));
+      }
+
+      listCol.add(Row(mainAxisSize: MainAxisSize.min, children: listRow));
+    }
+
+    return Container(child: Column(mainAxisSize: MainAxisSize.min, children: listCol));
+  }
+
+  Widget buildBlockTableContainer(int row, int col) {
+    BlockTable block = gameTable.getBlockTable(row, col);
+    double blockSize = (MediaQuery.of(context).size.width / gameTable.countRow);
+    Widget containerBackground = new GestureDetector(
+        onTap: () {
+          setState(() {
+            gameTable.blockPressed(row, col);
+          });
+          print("Block pressed : ${block.row} : ${block.col}");
+        },
+        child: Container(
+            width: blockSize,
+            height: blockSize,
+            padding: EdgeInsets.all(1),
+            decoration: new BoxDecoration(color: Colors.black, border: block.isSelected ? Border.all(width: 1, color: Colors.yellowAccent) : null),
+            child: Container(
+                width: blockSize,
+                height: blockSize,
+                margin: EdgeInsets.all(2),
+                decoration: new BoxDecoration(
+                  color: block.color,
+                  shape: BoxShape.circle,
+                ))));
+    return containerBackground;
+  }
+
+  handlePopup(String result) {
+    BotToast.showAttachedWidget(
+        target: Offset(MediaQuery.of(context).size.width / 2, MediaQuery.of(context).size.height / 2),
+        attachedBuilder: (cancel) => (Card(
+              color: Colors.white.withOpacity(0.8),
+              child: Container(
+                padding: EdgeInsets.symmetric(horizontal: 8),
+                child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      children: <Widget>[Text(
+                        "$result",
+                        style: TextStyle(color: result.contains("score") ? Colors.green : Colors.red, fontWeight: FontWeight.bold, fontSize: 30),
+                      )],
+                    )),
+              ),
+            )),
+        onlyOne: onlyOne,
+        animationDuration: Duration(milliseconds: animationMilliseconds),
+        animationReverseDuration: Duration(milliseconds: animationReverseMilliseconds),
+        duration: Duration(milliseconds: milliseconds));
   }
 }
