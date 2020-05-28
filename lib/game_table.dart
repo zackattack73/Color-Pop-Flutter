@@ -11,7 +11,6 @@ class GameTable {
   Color gameColor;
 
   List<BlockTable> tempSelectedBlocks = List();
-  bool firstCall;
 
   GameTable(int countRow, int countCol) {
     this.countRow = countRow;
@@ -82,7 +81,6 @@ class GameTable {
 
     tempSelectedBlocks.clear();
     tempSelectedBlocks = selectedBlocks;
-    firstCall = true;
     neighbor(tempSelectedBlocks[0],List());
     if (tempSelectedBlocks.isEmpty) {
       return "OKKKKK";
@@ -98,62 +96,71 @@ class GameTable {
   }
 
   neighbor(BlockTable currentBlock, List<BlockTable> neigh) {
-    // n1 - n4 are the 4 neighbor
-    List<BlockTable> neighborList = neigh;
-    BlockTable n1 = new BlockTable(currentBlock.row + 1, currentBlock.col);
-    BlockTable n2 = new BlockTable(currentBlock.row - 1, currentBlock.col);
-    BlockTable n3 = new BlockTable(currentBlock.row, currentBlock.col + 1);
-    BlockTable n4 = new BlockTable(currentBlock.row, currentBlock.col - 1);
-
-    print("SELECTED BLOCK : (${currentBlock.row},${currentBlock.col})");
-
-    for (int i = 0; i < tempSelectedBlocks.length; i++) {
-      print("Selected : (${tempSelectedBlocks[i].row},${tempSelectedBlocks[i].col}) == (${n1.row},${n1.col}) ?? THEN N1 NEIGHBOR");
-      print("Selected : (${tempSelectedBlocks[i].row},${tempSelectedBlocks[i].col}) == (${n2.row},${n2.col}) ?? THEN N2 NEIGHBOR");
-      print("Selected : (${tempSelectedBlocks[i].row},${tempSelectedBlocks[i].col}) == (${n3.row},${n3.col}) ?? THEN N3 NEIGHBOR");
-      print("Selected : (${tempSelectedBlocks[i].row},${tempSelectedBlocks[i].col}) == (${n4.row},${n4.col}) ?? THEN N4 NEIGHBOR");
-      if (tempSelectedBlocks[i].row == n1.row && tempSelectedBlocks[i].col == n1.col) {
-        print("N1 NEIGHBOR");
-        neighborList.add(n1);
-      } else if (tempSelectedBlocks[i].row == n2.row && tempSelectedBlocks[i].col == n2.col) {
-        print("N2 NEIGHBOR");
-        neighborList.add(n2);
-      } else if (tempSelectedBlocks[i].row == n3.row && tempSelectedBlocks[i].col == n3.col) {
-        print("N3 NEIGHBOR");
-        neighborList.add(n3);
-      } else if (tempSelectedBlocks[i].row == n4.row && tempSelectedBlocks[i].col == n4.col) {
-        print("N4 NEIGHBOR");
-        neighborList.add(n4);
-      } else if (!firstCall) {
-        print("NO NEIGHBOR");
-        remove(currentBlock);
-      }
-    }
-    if (neighborList.isNotEmpty && neighborList != null && neighborList.length == 1) {
-      firstCall = false;
+    if (tempSelectedBlocks.length != 0) {
       remove(currentBlock);
-      neighbor(neighborList[0],List());
-    } else if (neighborList.isNotEmpty && neighborList != null && neighborList.length > 1) {
-      List<BlockTable> tempNeighborList = List();
-      BlockTable block = (neighborList[0]);
-      neighborList.removeAt(0);
-      firstCall = false;
-      for (int j = 0; j < neighborList.length; j++) {
-        tempNeighborList.add(neighborList[j]);
+      /*print("Length : "+tempSelectedBlocks.length.toString());
+      for (int z = 0; z < tempSelectedBlocks.length; z++) {
+        print("Block number $z : (${tempSelectedBlocks[z].row},${tempSelectedBlocks[z].col})");
+      }*/
+
+      // Neighbor of block X
+      //      |     |
+      //      |  N2 |
+      // _____|_____|_____
+      //      |     |
+      //   N4 |  X  |  N3
+      // _____|_____|_____
+      //      |     |
+      //      |  N1 |
+      //      |     |
+      List<BlockTable> neighborList = neigh;
+      BlockTable n1 = new BlockTable(currentBlock.row + 1, currentBlock.col);
+      BlockTable n2 = new BlockTable(currentBlock.row - 1, currentBlock.col);
+      BlockTable n3 = new BlockTable(currentBlock.row, currentBlock.col + 1);
+      BlockTable n4 = new BlockTable(currentBlock.row, currentBlock.col - 1);
+
+      print("SELECTED BLOCK : (${currentBlock.row},${currentBlock.col})");
+
+      for (int i = 0; i < tempSelectedBlocks.length; i++) {
+        /*print("Selected : (${tempSelectedBlocks[i].row},${tempSelectedBlocks[i].col}) == (${n1.row},${n1.col}) ?? THEN N1 NEIGHBOR");
+        print("Selected : (${tempSelectedBlocks[i].row},${tempSelectedBlocks[i].col}) == (${n2.row},${n2.col}) ?? THEN N2 NEIGHBOR");
+        print("Selected : (${tempSelectedBlocks[i].row},${tempSelectedBlocks[i].col}) == (${n3.row},${n3.col}) ?? THEN N3 NEIGHBOR");
+        print("Selected : (${tempSelectedBlocks[i].row},${tempSelectedBlocks[i].col}) == (${n4.row},${n4.col}) ?? THEN N4 NEIGHBOR");*/
+        if (tempSelectedBlocks[i].row == n1.row && tempSelectedBlocks[i].col == n1.col) {
+          //print("N1 NEIGHBOR");
+          neighborList.add(n1);
+        } else if (tempSelectedBlocks[i].row == n2.row && tempSelectedBlocks[i].col == n2.col) {
+          //print("N2 NEIGHBOR");
+          neighborList.add(n2);
+        } else if (tempSelectedBlocks[i].row == n3.row && tempSelectedBlocks[i].col == n3.col) {
+          //print("N3 NEIGHBOR");
+          neighborList.add(n3);
+        } else if (tempSelectedBlocks[i].row == n4.row && tempSelectedBlocks[i].col == n4.col) {
+          //print("N4 NEIGHBOR");
+          neighborList.add(n4);
+        }
       }
-      remove(currentBlock);
-      neighbor(block,tempNeighborList);
+      if (neighborList.isNotEmpty && neighborList != null && neighborList.length == 1) {
+        neighbor(neighborList[0], List());
+      } else if (neighborList.isNotEmpty && neighborList != null && neighborList.length > 1) {
+        List<BlockTable> tempNeighborList = List();
+        BlockTable block = (neighborList[0]);
+        neighborList.removeAt(0);
+        for (int j = 0; j < neighborList.length; j++) {
+          tempNeighborList.add(neighborList[j]);
+        }
+        neighbor(block, tempNeighborList);
+      }
     }
   }
-  remove(BlockTable currentBlock) { // TODO FIX WRONG REMOVE
+  remove(BlockTable currentBlock) {
     for (int i = 0; i < tempSelectedBlocks.length; i++) {
       if (currentBlock.row == tempSelectedBlocks[i].row && currentBlock.col == tempSelectedBlocks[i].col) {
         tempSelectedBlocks.removeAt(i);
       }
     }
-
-
   }
+
   updateUI() {
     // This Function will :
     //    - Delete selected blocks
