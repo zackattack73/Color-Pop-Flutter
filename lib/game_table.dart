@@ -40,7 +40,9 @@ class GameTable {
   }
 
   blockPressed(int row, int col) {
-    table[row][col].isSelected = !table[row][col].isSelected;
+    if (table[row][col].color!=Colors.black) {
+      table[row][col].isSelected = !table[row][col].isSelected;
+    }
   }
   String movement () {
     // This function will verify :
@@ -80,18 +82,18 @@ class GameTable {
     }
 
     tempSelectedBlocks.clear();
-    tempSelectedBlocks = selectedBlocks;
+    tempSelectedBlocks = selectedBlocks.toList();
     neighbor(tempSelectedBlocks[0],List());
-    if (tempSelectedBlocks.isEmpty) {
-      return "OKKKKK";
-    } else {
+    if (tempSelectedBlocks.isNotEmpty) {
       for (int x = 0; x < tempSelectedBlocks.length; x++) {
         print("NOT EMPTY STILL : (${tempSelectedBlocks[x].row},${tempSelectedBlocks[x].col})");
       }
-      return "NOT OKKKK";
+      return "Veuillez sélectionner des pions adjacents";
     }
 
+    updateUI(selectedBlocks);
 
+return "score";
 
   }
 
@@ -161,11 +163,34 @@ class GameTable {
     }
   }
 
-  updateUI() {
+  updateUI(List<BlockTable> selectedBlocks) {
     // This Function will :
     //    - Delete selected blocks
     //    - Deselect blocks
     //    - Move blocks to fit the new empty one
     //    - Move columns if one is empty
+    for (int i = 0; i < selectedBlocks.length; i++) {
+      table[selectedBlocks[i].row][selectedBlocks[i].col].isSelected = !table[selectedBlocks[i].row][selectedBlocks[i].col].isSelected;
+      table[selectedBlocks[i].row][selectedBlocks[i].col].color = Colors.black;
+      moveUpperNeighbor(selectedBlocks[i]);
+    }
+
+  }
+  moveUpperNeighbor(BlockTable currentBlock) {
+    if (currentBlock.row - 1 >= 0) {
+      BlockTable n2 = getBlockTable(currentBlock.row - 1, currentBlock.col);
+      if (n2.color != Colors.black) {
+        table[currentBlock.row][currentBlock.col].color = n2.color;
+        moveUpperNeighbor(n2);
+      } else {
+        table[currentBlock.row][currentBlock.col].color = Colors.black;
+      }
+    }
+    // INFINITE VERSION
+   /* BlockTable n2 = new BlockTable(currentBlock.row - 1, currentBlock.col);
+    if (n2.row >= 0 && n2.color != Colors.black) {
+      table[currentBlock.row][currentBlock.col].color = n2.color;
+      moveUpperNeighbor(n2);
+    } */
   }
 }
