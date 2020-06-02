@@ -3,12 +3,12 @@ import 'package:flutter/material.dart';
 import 'dart:math';
 
 class GameTable {
-
   int countRow;
   int countCol;
   List<List<BlockTable>> table;
   int score = 0;
   Color gameColor;
+  int firstEmptyCol = 10;
 
   List<BlockTable> tempSelectedBlocks = List();
 
@@ -23,34 +23,38 @@ class GameTable {
     for (int row = 0; row < countRow; row++) {
       List<BlockTable> listBlockTable = List();
       for (int col = 0; col < countCol; col++) {
-        listBlockTable.add(BlockTable(row,col));
+        listBlockTable.add(BlockTable(row, col));
       }
       table.add(listBlockTable);
     }
   }
+
   BlockTable getBlockTable(int row, int col) {
     return table[row][col];
   }
 
   Color randomGameColor() {
-    List<Color> gameColors = [Colors.yellow,Colors.green,Colors.blue,Colors.orange,Colors.pinkAccent];
+    List<Color> gameColors = [Colors.yellow, Colors.green, Colors.blue, Colors.orange, Colors.pinkAccent];
     var rng = new Random();
     int random = rng.nextInt(5);
     return gameColors[random];
   }
 
   blockPressed(int row, int col) {
-    if (table[row][col].color!=Colors.black) {
+    if (table[row][col].color != Colors.black) {
       table[row][col].isSelected = !table[row][col].isSelected;
     }
   }
-  String movement () {
+
+  String movement() {
     // This function will verify :
-    //    - Nb of selected block >= 2
-    //    - Selected block same color (or include white)
-    //    - Selected block are linked
-    //    - Compute score
-    //    - Update UI (Another function)
+    //    - Nb of selected block >= 2 [A]
+    //    - Selected block same color (or include white) [B]
+    //    - Selected block are linked [C]
+    //    - Compute score [D]
+    //    - Update UI (Another function) [E]
+
+    // [A]
     List<BlockTable> selectedBlocks = List();
     for (int row = 0; row < countRow; row++) {
       for (int col = 0; col < countCol; col++) {
@@ -66,6 +70,7 @@ class GameTable {
       return "Veuillez sélectionner 2 pions ou plus";
     }
 
+    // [B]
     Color mainColor;
     bool sameColor = true;
     for (int i = 0; i < selectedBlocks.length; i++) {
@@ -81,9 +86,10 @@ class GameTable {
       return "Veuillez sélectionner des pions de même couleur";
     }
 
+    // [C]
     tempSelectedBlocks.clear();
     tempSelectedBlocks = selectedBlocks.toList();
-    neighbor(tempSelectedBlocks[0],List());
+    neighbor(tempSelectedBlocks[0], List());
     if (tempSelectedBlocks.isNotEmpty) {
       for (int x = 0; x < tempSelectedBlocks.length; x++) {
         print("NOT EMPTY STILL : (${tempSelectedBlocks[x].row},${tempSelectedBlocks[x].col})");
@@ -91,10 +97,10 @@ class GameTable {
       return "Veuillez sélectionner des pions adjacents";
     }
 
+    // [E]
     updateUI(selectedBlocks);
 
-return "score";
-
+    return "score";
   }
 
   neighbor(BlockTable currentBlock, List<BlockTable> neigh) {
@@ -105,7 +111,7 @@ return "score";
         print("Block number $z : (${tempSelectedBlocks[z].row},${tempSelectedBlocks[z].col})");
       }*/
 
-      // Neighbor of block X
+      // Neighbors of block X
       //      |     |
       //      |  N2 |
       // _____|_____|_____
@@ -115,6 +121,7 @@ return "score";
       //      |     |
       //      |  N1 |
       //      |     |
+
       List<BlockTable> neighborList = neigh;
       BlockTable n1 = new BlockTable(currentBlock.row + 1, currentBlock.col);
       BlockTable n2 = new BlockTable(currentBlock.row - 1, currentBlock.col);
@@ -155,6 +162,7 @@ return "score";
       }
     }
   }
+
   remove(BlockTable currentBlock) {
     for (int i = 0; i < tempSelectedBlocks.length; i++) {
       if (currentBlock.row == tempSelectedBlocks[i].row && currentBlock.col == tempSelectedBlocks[i].col) {
@@ -165,32 +173,66 @@ return "score";
 
   updateUI(List<BlockTable> selectedBlocks) {
     // This Function will :
-    //    - Delete selected blocks
-    //    - Deselect blocks
-    //    - Move blocks to fit the new empty one
-    //    - Move columns if one is empty
+    //    - Delete selected blocks [1]
+    //    - Deselect blocks [2]
+    //    - Move blocks to fit the new empty one [3]
+    //    - Move columns if one is empty [4]
+
+    // [1] & [2]
     for (int i = 0; i < selectedBlocks.length; i++) {
       table[selectedBlocks[i].row][selectedBlocks[i].col].isSelected = !table[selectedBlocks[i].row][selectedBlocks[i].col].isSelected;
       table[selectedBlocks[i].row][selectedBlocks[i].col].color = Colors.black;
       moveUpperNeighbor(selectedBlocks[i]);
     }
 
+    moveColumns();
   }
+
+  // [3]
   moveUpperNeighbor(BlockTable currentBlock) {
+    // TODO ADD ANIMATION ?
     if (currentBlock.row - 1 >= 0) {
       BlockTable n2 = getBlockTable(currentBlock.row - 1, currentBlock.col);
       if (n2.color != Colors.black) {
         table[currentBlock.row][currentBlock.col].color = n2.color;
+        table[n2.row][n2.col].color = Colors.black;
         moveUpperNeighbor(n2);
       } else {
         table[currentBlock.row][currentBlock.col].color = Colors.black;
       }
     }
-    // INFINITE VERSION
-   /* BlockTable n2 = new BlockTable(currentBlock.row - 1, currentBlock.col);
+    // INFINITE VERSION BELOW
+    /* BlockTable n2 = new BlockTable(currentBlock.row - 1, currentBlock.col);
     if (n2.row >= 0 && n2.color != Colors.black) {
       table[currentBlock.row][currentBlock.col].color = n2.color;
       moveUpperNeighbor(n2);
     } */
+  }
+
+  // [4]
+  moveColumns() {
+    List<int> emptyColNumber = List();
+    for (int col = 0; col < countCol; col++) {
+      for (int row = 0; row < countRow;) {
+        if (table[row][col].color != Colors.black) {
+          row = countRow;
+        } else if (row + 1 == countRow) {
+          emptyColNumber.add(col);
+          print("EMPTY COLUMN ADDED : $col");
+          row++;
+        } else {
+          row++;
+        }
+      }
+    }
+
+    emptyColNumber.sort();
+    /*emptyColNumber.forEach((column) {
+      if (column < 9) {
+        for (int row = 0; row < countRow;) {
+          table[row][column].color = table[row][column+1].color;
+        }
+      }
+    });*/
   }
 }
