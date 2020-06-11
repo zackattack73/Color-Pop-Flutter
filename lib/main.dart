@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:color_pop/game_table.dart';
 import 'package:color_pop/block_table.dart';
 import 'package:bot_toast/bot_toast.dart';
+import 'package:color_pop/animation.dart';
 
 void main() => runApp(MyApp());
 
@@ -23,77 +24,96 @@ class MyHomePage extends StatefulWidget {
   _MyHomePageState createState() => _MyHomePageState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
+class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
   GameTable gameTable;
   bool onlyOne = false;
   int milliseconds = 2000;
   int animationMilliseconds = 200;
   int animationReverseMilliseconds = 200;
+  Animation<Offset> animation;
+  AnimationController animationController;
 
   @override
   void initState() {
     super.initState();
     gameTable = GameTable(10, 10);
+    animationController = AnimationController(vsync: this, duration: Duration(milliseconds: 500));
+    animation = Tween<Offset>(begin: Offset(0, 0), end: Offset(0, 1)).animate(animationController);
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
-          color: Colors.grey,
-          child: Stack(
-            children: <Widget>[
-              Center(
-                child: buildGameTable(),
-              ),
-              new Positioned(
-                child: new Align(
-                    alignment: Alignment(0, 0.9),
-                    child: RaisedButton(
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18.0)),
-                      onPressed: () {
-                        setState(() {
-                          String result = gameTable.movement();
-                          handlePopup(result);
-                        });
-                      },
-                      child: Text(
-                        "Valider",
-                        style: TextStyle(color: Colors.white, fontSize: 20),
-                      ),
-                      color: Colors.green,
-                      padding: EdgeInsets.only(left: 40.0, right: 40.0, bottom: 10.0, top: 10.0),
-                    )),
-              ),
-              new Positioned(
+        body: Container(
+            color: Colors.black,
+            child: Stack(
+              children: <Widget>[
+                Center(
+                  child: buildGameTable(),
+                ),
+                new Positioned(
                   child: new Align(
-                alignment: Alignment(0, -0.9),
-                child: RaisedButton(
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18.0)),
-                    onPressed: () {},
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: <Widget>[
-                        SizedBox(height: 10),
-                        Container(
-                            width: 30,
-                            height: 30,
-                            margin: EdgeInsets.all(2),
-                            decoration: new BoxDecoration(
-                              color: gameTable.gameColor,
-                              shape: BoxShape.circle,
-                            )),
-                        Text(
-                          "Votre score : ${gameTable.score}",
-                          style: TextStyle(fontSize: 20),
+                      alignment: Alignment(0, 0.9),
+                      child: RaisedButton(
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18.0)),
+                        onPressed: () {
+                          setState(() {
+                            String result = gameTable.movement();
+                            handlePopup(result);
+                          });
+                        },
+                        child: Text(
+                          "Valider",
+                          style: TextStyle(color: Colors.white, fontSize: 20),
                         ),
-                        SizedBox(height: 10),
-                      ],
-                    )),
-              ))
-            ],
-          )),
-    );
+                        color: Colors.green,
+                        padding: EdgeInsets.only(left: 40.0, right: 40.0, bottom: 10.0, top: 10.0),
+                      )),
+                ),
+                new Positioned(
+                    child: new Align(
+                  alignment: Alignment(0, -0.9),
+                  child: RaisedButton(
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18.0)),
+                      onPressed: () {},
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: <Widget>[
+                          SizedBox(height: 10),
+                          Container(
+                              width: 30,
+                              height: 30,
+                              margin: EdgeInsets.all(2),
+                              decoration: new BoxDecoration(
+                                color: gameTable.gameColor,
+                                shape: BoxShape.circle,
+                              )),
+                          Text(
+                            "Votre score : ${gameTable.score}",
+                            style: TextStyle(fontSize: 20),
+                          ),
+                          SizedBox(height: 10),
+                        ],
+                      )),
+                ))
+              ],
+            )),
+        floatingActionButton: FloatingActionButton(onPressed: () {
+          switch (animationController.status) {
+            case AnimationStatus.completed:
+              animationController.reverse();
+              break;
+            case AnimationStatus.dismissed:
+              animationController.forward();
+              break;
+            default:
+          }
+          /*Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => Animate()),
+          );*/
+        },child: Icon(Icons.play_arrow),
+      backgroundColor: Colors.green,));
   }
 
   buildGameTable() {
@@ -124,8 +144,19 @@ class _MyHomePageState extends State<MyHomePage> {
             width: blockSize,
             height: blockSize,
             padding: EdgeInsets.all(1),
-            decoration: new BoxDecoration(color: Colors.black, border: block.isSelected ? Border.all(width: 1, color: Colors.yellowAccent) : null),
-            child: Container(
+            decoration: new BoxDecoration(color: Colors.transparent, border: block.isSelected ? Border.all(width: 1, color: Colors.yellowAccent) : null),
+            child:
+            block.transition ?
+            SlideTransition(
+                position: animation,
+                child: Container(
+                    width: blockSize,
+                    height: blockSize,
+                    margin: EdgeInsets.all(2),
+                    decoration: new BoxDecoration(
+                      color: block.color,
+                      shape: BoxShape.circle,
+                    ))) : Container(
                 width: blockSize,
                 height: blockSize,
                 margin: EdgeInsets.all(2),
@@ -148,10 +179,12 @@ class _MyHomePageState extends State<MyHomePage> {
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       mainAxisAlignment: MainAxisAlignment.spaceAround,
-                      children: <Widget>[Text(
-                        "$result",
-                        style: TextStyle(color: result.contains("score") ? Colors.green : Colors.red, fontWeight: FontWeight.bold, fontSize: 30),
-                      )],
+                      children: <Widget>[
+                        Text(
+                          "$result",
+                          style: TextStyle(color: result.contains("score") ? Colors.green : Colors.red, fontWeight: FontWeight.bold, fontSize: 30),
+                        )
+                      ],
                     )),
               ),
             )),

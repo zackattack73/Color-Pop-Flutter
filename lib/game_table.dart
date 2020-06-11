@@ -41,7 +41,7 @@ class GameTable {
   }
 
   blockPressed(int row, int col) {
-    if (table[row][col].color != Colors.black) {
+    if (table[row][col].color != Colors.transparent) {
       table[row][col].isSelected = !table[row][col].isSelected;
     }
   }
@@ -181,7 +181,7 @@ class GameTable {
     // [1] & [2]
     for (int i = 0; i < selectedBlocks.length; i++) {
       table[selectedBlocks[i].row][selectedBlocks[i].col].isSelected = !table[selectedBlocks[i].row][selectedBlocks[i].col].isSelected;
-      table[selectedBlocks[i].row][selectedBlocks[i].col].color = Colors.black;
+      table[selectedBlocks[i].row][selectedBlocks[i].col].color = Colors.transparent;
       moveUpperNeighbor(selectedBlocks[i]);
     }
 
@@ -193,17 +193,17 @@ class GameTable {
     // TODO ADD ANIMATION ?
     if (currentBlock.row - 1 >= 0) {
       BlockTable n2 = getBlockTable(currentBlock.row - 1, currentBlock.col);
-      if (n2.color != Colors.black) {
+      if (n2.color != Colors.transparent) {
         table[currentBlock.row][currentBlock.col].color = n2.color;
-        table[n2.row][n2.col].color = Colors.black;
+        table[n2.row][n2.col].color = Colors.transparent;
         moveUpperNeighbor(n2);
       } else {
-        table[currentBlock.row][currentBlock.col].color = Colors.black;
+        table[currentBlock.row][currentBlock.col].color = Colors.transparent;
       }
     }
     // INFINITE VERSION BELOW
     /* BlockTable n2 = new BlockTable(currentBlock.row - 1, currentBlock.col);
-    if (n2.row >= 0 && n2.color != Colors.black) {
+    if (n2.row >= 0 && n2.color != Colors.transparent) {
       table[currentBlock.row][currentBlock.col].color = n2.color;
       moveUpperNeighbor(n2);
     } */
@@ -214,7 +214,7 @@ class GameTable {
     List<int> emptyColNumber = List();
     for (int col = 0; col < countCol; col++) {
       for (int row = 0; row < countRow;) {
-        if (table[row][col].color != Colors.black) {
+        if (table[row][col].color != Colors.transparent) {
           row = countRow;
         } else if (row + 1 == countRow) {
           emptyColNumber.add(col);
