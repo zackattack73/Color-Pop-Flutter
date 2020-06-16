@@ -98,9 +98,10 @@ class GameTable {
     }
 
     // [E]
-    updateUI(selectedBlocks);
-
-    return "score";
+    animation(selectedBlocks);
+    tempSelectedBlocks = selectedBlocks.toList();
+    score = score + selectedBlocks.length;
+    return "Score +${selectedBlocks.length}";
   }
 
   neighbor(BlockTable currentBlock, List<BlockTable> neigh) {
@@ -171,17 +172,42 @@ class GameTable {
     }
   }
 
-  updateUI(List<BlockTable> selectedBlocks) {
+  animation(List<BlockTable> selectedBlocks) {
     // This Function will :
     //    - Delete selected blocks [1]
     //    - Deselect blocks [2]
-    //    - Move blocks to fit the new empty one [3]
-    //    - Move columns if one is empty [4]
+    //    - Prepare Animation [0]
 
     // [1] & [2]
     for (int i = 0; i < selectedBlocks.length; i++) {
       table[selectedBlocks[i].row][selectedBlocks[i].col].isSelected = !table[selectedBlocks[i].row][selectedBlocks[i].col].isSelected;
       table[selectedBlocks[i].row][selectedBlocks[i].col].color = Colors.transparent;
+
+      // [0]
+      for (int j = selectedBlocks[i].row; j >= 0; j--) {
+        print("Prepare Animation for : ("+selectedBlocks[i].row.toString() + " AND " + selectedBlocks[i].col.toString()+")");
+        BlockTable anim = getBlockTable(j, selectedBlocks[i].col);
+        anim.transition = true;
+        anim.transitionLength++;
+      }
+    }
+  }
+
+
+  updateUI() {
+    // This Function will :
+    //    - Reset Animation [0]
+    //    - Move blocks to fit the new empty one [3]
+    //    - Move columns if one is empty [4]
+    List<BlockTable> selectedBlocks = tempSelectedBlocks.toList();
+    print("DEBUG TEMPSELECTED LENGTH :" + tempSelectedBlocks.length.toString());
+    for (int i = 0; i < selectedBlocks.length; i++) {
+      // [0]
+      for (int j = selectedBlocks[i].row; j >= 0; j--) {
+        BlockTable anim = getBlockTable(j, selectedBlocks[i].col);
+        anim.transition = false;
+        anim.transitionLength = 0;
+      }
       moveUpperNeighbor(selectedBlocks[i]);
     }
 
@@ -190,7 +216,6 @@ class GameTable {
 
   // [3]
   moveUpperNeighbor(BlockTable currentBlock) {
-    // TODO ADD ANIMATION ?
     if (currentBlock.row - 1 >= 0) {
       BlockTable n2 = getBlockTable(currentBlock.row - 1, currentBlock.col);
       if (n2.color != Colors.transparent) {

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:color_pop/game_table.dart';
 import 'package:color_pop/block_table.dart';
 import 'package:bot_toast/bot_toast.dart';
-import 'package:color_pop/animation.dart';
 
 void main() => runApp(MyApp());
 
@@ -37,8 +36,16 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
   void initState() {
     super.initState();
     gameTable = GameTable(10, 10);
-    animationController = AnimationController(vsync: this, duration: Duration(milliseconds: 500));
-    animation = Tween<Offset>(begin: Offset(0, 0), end: Offset(0, 1)).animate(animationController);
+    animationController = AnimationController(vsync: this, duration: Duration(milliseconds: 350));
+    animationController.addStatusListener((status) {
+      if(status == AnimationStatus.completed) {
+        setState(() {
+          print("ANIMATION COMPLETE");
+          gameTable.updateUI();
+        });
+        animationController.reset();
+      }
+    });
   }
 
   @override
@@ -59,6 +66,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                         onPressed: () {
                           setState(() {
                             String result = gameTable.movement();
+                            animationController.forward();
                             handlePopup(result);
                           });
                         },
@@ -98,7 +106,9 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                 ))
               ],
             )),
-        floatingActionButton: FloatingActionButton(onPressed: () {
+
+        // Debug button for animation
+        /*floatingActionButton: FloatingActionButton(onPressed: () {
           switch (animationController.status) {
             case AnimationStatus.completed:
               animationController.reverse();
@@ -113,8 +123,8 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
             MaterialPageRoute(builder: (context) => Animate()),
           );*/
         },child: Icon(Icons.play_arrow),
-      backgroundColor: Colors.green,));
-  }
+      backgroundColor: Colors.green,)*/);
+    }
 
   buildGameTable() {
     List<Widget> listCol = List();
@@ -148,7 +158,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
             child:
             block.transition ?
             SlideTransition(
-                position: animation,
+                position: Tween<Offset>(begin: Offset(0, 0), end: Offset(0, block.transitionLength.toDouble())).animate(animationController),
                 child: Container(
                     width: blockSize,
                     height: blockSize,
@@ -182,7 +192,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                       children: <Widget>[
                         Text(
                           "$result",
-                          style: TextStyle(color: result.contains("score") ? Colors.green : Colors.red, fontWeight: FontWeight.bold, fontSize: 30),
+                          style: TextStyle(color: result.contains("Score") ? Colors.green : Colors.red, fontWeight: FontWeight.bold, fontSize: 30),
                         )
                       ],
                     )),
