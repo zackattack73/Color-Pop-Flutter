@@ -11,19 +11,19 @@ class MyApp extends StatelessWidget {
     return BotToastInit(
         child: MaterialApp(
       navigatorObservers: [BotToastNavigatorObserver()],
-      home: MyHomePage(),
+      home: ColorPop(),
     ));
   }
 }
 
-class MyHomePage extends StatefulWidget {
-  MyHomePage({Key key}) : super(key: key);
+class ColorPop extends StatefulWidget {
+  ColorPop({Key key}) : super(key: key);
 
   @override
-  _MyHomePageState createState() => _MyHomePageState();
+  _ColorPopState createState() => _ColorPopState();
 }
 
-class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
+class _ColorPopState extends State<ColorPop> with TickerProviderStateMixin {
   GameTable gameTable;
   bool onlyOne = false;
   int milliseconds = 2000;
@@ -38,9 +38,8 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
     gameTable = GameTable(10, 10);
     animationController = AnimationController(vsync: this, duration: Duration(milliseconds: 350));
     animationController.addStatusListener((status) {
-      if(status == AnimationStatus.completed) {
+      if (status == AnimationStatus.completed) {
         setState(() {
-          print("ANIMATION COMPLETE");
           gameTable.updateUI();
         });
         animationController.reset();
@@ -50,65 +49,74 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-        body: Container(
-            color: Colors.black,
-            child: Stack(
-              children: <Widget>[
-                Center(
-                  child: buildGameTable(),
-                ),
-                new Positioned(
-                  child: new Align(
-                      alignment: Alignment(0, 0.9),
-                      child: RaisedButton(
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18.0)),
-                        onPressed: () {
-                          setState(() {
-                            String result = gameTable.movement();
-                            animationController.forward();
-                            handlePopup(result);
-                          });
-                        },
-                        child: Text(
-                          "Valider",
-                          style: TextStyle(color: Colors.white, fontSize: 20),
-                        ),
-                        color: Colors.green,
-                        padding: EdgeInsets.only(left: 40.0, right: 40.0, bottom: 10.0, top: 10.0),
-                      )),
-                ),
-                new Positioned(
-                    child: new Align(
-                  alignment: Alignment(0, -0.9),
-                  child: RaisedButton(
+    return SafeArea(child : Scaffold(
+      body: Container(
+          color: Colors.black,
+          child: Stack(
+            children: <Widget>[
+              Center(
+                child: buildGameTable(),
+              ),
+              new Positioned(
+                child: new Align(
+                    alignment: Alignment(0, 0.9),
+                    child: RaisedButton(
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18.0)),
-                      onPressed: () {},
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: <Widget>[
-                          SizedBox(height: 10),
-                          Container(
-                              width: 30,
-                              height: 30,
-                              margin: EdgeInsets.all(2),
-                              decoration: new BoxDecoration(
-                                color: gameTable.gameColor,
-                                shape: BoxShape.circle,
-                              )),
-                          Text(
-                            "Votre score : ${gameTable.score}",
-                            style: TextStyle(fontSize: 20),
-                          ),
-                          SizedBox(height: 10),
-                        ],
-                      )),
-                ))
-              ],
-            )),
+                      onPressed: () {
+                        setState(() {
+                          String result = gameTable.movement();
+                          animationController.forward();
+                          handlePopup(result);
+                        });
+                      },
+                      child: Text(
+                        "Valider",
+                        style: TextStyle(color: Colors.white, fontSize: 20),
+                      ),
+                      color: Colors.green,
+                      padding: EdgeInsets.only(left: 40.0, right: 40.0, bottom: 10.0, top: 10.0),
+                    )),
+              ),
+              new Positioned(
+                  child: new Align(
+                alignment: Alignment(0, -0.9),
+                child: RaisedButton(
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18.0)),
+                    onPressed: () {},
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: <Widget>[
+                        SizedBox(height: 10),
+                        Container(
+                            width: 30,
+                            height: 30,
+                            margin: EdgeInsets.all(2),
+                            decoration: new BoxDecoration(
+                              color: gameTable.gameColor,
+                              shape: BoxShape.circle,
+                            )),
+                        Text(
+                          "Score : ${gameTable.score}",
+                          style: TextStyle(fontSize: 20),
+                        ),
+                        SizedBox(height: 10),
+                      ],
+                    )),
+              ))
+            ],
+          )),
 
-        // Debug button for animation
-        /*floatingActionButton: FloatingActionButton(onPressed: () {
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Route route = MaterialPageRoute(builder: (context) => ColorPop());
+          Navigator.pushReplacement(context, route);
+        },
+        child: Icon(Icons.replay),
+        backgroundColor: Colors.red,
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
+      // Debug button for animation
+      /*floatingActionButton: FloatingActionButton(onPressed: () {
           switch (animationController.status) {
             case AnimationStatus.completed:
               animationController.reverse();
@@ -118,13 +126,10 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
               break;
             default:
           }
-          /*Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => Animate()),
-          );*/
         },child: Icon(Icons.play_arrow),
-      backgroundColor: Colors.green,)*/);
-    }
+      backgroundColor: Colors.green,)*/
+    ));
+  }
 
   buildGameTable() {
     List<Widget> listCol = List();
@@ -155,25 +160,25 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
             height: blockSize,
             padding: EdgeInsets.all(1),
             decoration: new BoxDecoration(color: Colors.transparent, border: block.isSelected ? Border.all(width: 1, color: Colors.yellowAccent) : null),
-            child:
-            block.transition ?
-            SlideTransition(
-                position: Tween<Offset>(begin: Offset(0, 0), end: Offset(0, block.transitionLength.toDouble())).animate(animationController),
-                child: Container(
+            child: block.transition
+                ? SlideTransition(
+                    position: Tween<Offset>(begin: Offset(0, 0), end: Offset(0, block.transitionLength.toDouble())).animate(animationController),
+                    child: Container(
+                        width: blockSize,
+                        height: blockSize,
+                        margin: EdgeInsets.all(2),
+                        decoration: new BoxDecoration(
+                          color: block.color,
+                          shape: BoxShape.circle,
+                        )))
+                : Container(
                     width: blockSize,
                     height: blockSize,
                     margin: EdgeInsets.all(2),
                     decoration: new BoxDecoration(
                       color: block.color,
                       shape: BoxShape.circle,
-                    ))) : Container(
-                width: blockSize,
-                height: blockSize,
-                margin: EdgeInsets.all(2),
-                decoration: new BoxDecoration(
-                  color: block.color,
-                  shape: BoxShape.circle,
-                ))));
+                    ))));
     return containerBackground;
   }
 

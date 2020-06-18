@@ -18,6 +18,7 @@ class GameTable {
     this.gameColor = randomGameColor();
     init();
   }
+
   init() {
     table = List();
     for (int row = 0; row < countRow; row++) {
@@ -61,7 +62,7 @@ class GameTable {
         BlockTable block = getBlockTable(row, col);
         if (block.isSelected) {
           selectedBlocks.add(block);
-          print("Block Selected : ${block.row} : ${block.col}");
+          // print("Block Selected : ${block.row} : ${block.col}");
         }
       }
     }
@@ -92,7 +93,7 @@ class GameTable {
     neighbor(tempSelectedBlocks[0], List());
     if (tempSelectedBlocks.isNotEmpty) {
       for (int x = 0; x < tempSelectedBlocks.length; x++) {
-        print("NOT EMPTY STILL : (${tempSelectedBlocks[x].row},${tempSelectedBlocks[x].col})");
+        // print("NOT EMPTY STILL : (${tempSelectedBlocks[x].row},${tempSelectedBlocks[x].col})");
       }
       return "Veuillez sélectionner des pions adjacents";
     }
@@ -129,7 +130,7 @@ class GameTable {
       BlockTable n3 = new BlockTable(currentBlock.row, currentBlock.col + 1);
       BlockTable n4 = new BlockTable(currentBlock.row, currentBlock.col - 1);
 
-      print("SELECTED BLOCK : (${currentBlock.row},${currentBlock.col})");
+      //print("SELECTED BLOCK : (${currentBlock.row},${currentBlock.col})");
 
       for (int i = 0; i < tempSelectedBlocks.length; i++) {
         /*print("Selected : (${tempSelectedBlocks[i].row},${tempSelectedBlocks[i].col}) == (${n1.row},${n1.col}) ?? THEN N1 NEIGHBOR");
@@ -185,7 +186,7 @@ class GameTable {
 
       // [0]
       for (int j = selectedBlocks[i].row; j >= 0; j--) {
-        print("Prepare Animation for : ("+selectedBlocks[i].row.toString() + " AND " + selectedBlocks[i].col.toString()+")");
+        //print("Prepare Animation for : (" + selectedBlocks[i].row.toString() + " AND " + selectedBlocks[i].col.toString() + ")");
         BlockTable anim = getBlockTable(j, selectedBlocks[i].col);
         anim.transition = true;
         anim.transitionLength++;
@@ -193,14 +194,12 @@ class GameTable {
     }
   }
 
-
   updateUI() {
     // This Function will :
     //    - Reset Animation [0]
     //    - Move blocks to fit the new empty one [3]
     //    - Move columns if one is empty [4]
     List<BlockTable> selectedBlocks = tempSelectedBlocks.toList();
-    print("DEBUG TEMPSELECTED LENGTH :" + tempSelectedBlocks.length.toString());
     for (int i = 0; i < selectedBlocks.length; i++) {
       // [0]
       for (int j = selectedBlocks[i].row; j >= 0; j--) {
@@ -226,7 +225,7 @@ class GameTable {
         table[currentBlock.row][currentBlock.col].color = Colors.transparent;
       }
     }
-    // INFINITE VERSION BELOW
+    // INFINITE VERSION BELOW ¯\_(ツ)_/¯
     /* BlockTable n2 = new BlockTable(currentBlock.row - 1, currentBlock.col);
     if (n2.row >= 0 && n2.color != Colors.transparent) {
       table[currentBlock.row][currentBlock.col].color = n2.color;
@@ -243,7 +242,7 @@ class GameTable {
           row = countRow;
         } else if (row + 1 == countRow) {
           emptyColNumber.add(col);
-          print("EMPTY COLUMN ADDED : $col");
+          //print("EMPTY COLUMN ADDED : $col");
           row++;
         } else {
           row++;
@@ -252,12 +251,26 @@ class GameTable {
     }
 
     emptyColNumber.sort();
-    /*emptyColNumber.forEach((column) {
-      if (column < 9) {
-        for (int row = 0; row < countRow;) {
-          table[row][column].color = table[row][column+1].color;
+    if (emptyColNumber.isNotEmpty && emptyColNumber.length == 1 && emptyColNumber[0] == firstEmptyCol - 1) {
+      firstEmptyCol--;
+    } else {
+      for (int colE = emptyColNumber.length - 1; colE >= 0; colE--) {
+        if (emptyColNumber[colE] < firstEmptyCol -1) {
+          removeEmptyCol(emptyColNumber[colE]);
         }
       }
-    });*/
+    }
+  }
+
+  removeEmptyCol(int colE) {
+    for (int col = colE; col < firstEmptyCol - 1; col++) {
+      for (int row = 0; row < countRow; row++) {
+        table[row][col].color = table[row][col + 1].color;
+      }
+    }
+    for (int row = 0; row < countRow; row++) {
+      table[row][firstEmptyCol - 1].color = Colors.transparent;
+    }
+    firstEmptyCol--;
   }
 }
