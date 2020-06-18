@@ -1,4 +1,4 @@
-# Color pop
+# Color pop <img src="https://i.imgur.com/A1PjBpZ.png" width="3%" />
 
 Solo version of the french board game [Color pop](https://www.gigamic.com/jeu/color-pop).
 <p float="left">
