@@ -1,6 +1,21 @@
-# color_pop
+# Color pop
 
-A new Flutter project.
+Solo version of the french board game [Color pop](https://www.gigamic.com/jeu/color-pop).
+<p float="left">
+  <img src="https://i.imgur.com/S3slqNK.jpg" width="20%" />
+</p>
+
+The goal is to remove all colored tokens.
+
+To remove tokens, select 2 or more linked tokens of the same color.
+
+White tokens can be any color.
+
+<p float="left">
+  <img src="https://i.imgur.com/CmRR9s0.png" width="40%" />
+</p>
+
+Feature animation, score and maybe multiplayer one day.
 
 ## Getting Started
 
