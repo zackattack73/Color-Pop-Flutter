@@ -17,6 +17,13 @@ White tokens can be any color.
 
 Feature animation, score and maybe multiplayer one day.
 
+# TODO in V2.0
+- Add difficulty (More color, less white tokens)
+- White mode
+- Save current game
+- Custom colors
+- Multiplayer ?
+
 ## Getting Started
 
 This project is a starting point for a Flutter application.
