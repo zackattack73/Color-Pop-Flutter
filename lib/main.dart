@@ -49,7 +49,7 @@ class _ColorPopState extends State<ColorPop> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(child : Scaffold(
+    return Scaffold(
       body: Container(
           color: Colors.black,
           child: Stack(
@@ -128,7 +128,7 @@ class _ColorPopState extends State<ColorPop> with TickerProviderStateMixin {
           }
         },child: Icon(Icons.play_arrow),
       backgroundColor: Colors.green,)*/
-    ));
+    );
   }
 
   buildGameTable() {
