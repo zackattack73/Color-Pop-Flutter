@@ -65,7 +65,7 @@ class _ColorPopState extends State<ColorPop> with TickerProviderStateMixin {
                       onPressed: () {
                         setState(() {
                           String result = gameTable.movement();
-                          animationController.forward();
+                          result.contains("Score") ? animationController.forward() : null;
                           handlePopup(result);
                         });
                       },
@@ -147,7 +147,7 @@ class _ColorPopState extends State<ColorPop> with TickerProviderStateMixin {
 
   Widget buildBlockTableContainer(int row, int col) {
     BlockTable block = gameTable.getBlockTable(row, col);
-    double blockSize = (MediaQuery.of(context).size.width / gameTable.countRow);
+    double blockSize = MediaQuery.of(context).size.width < MediaQuery.of(context).size.height ? (MediaQuery.of(context).size.width / gameTable.countRow) : (MediaQuery.of(context).size.height / gameTable.countRow) ;
     Widget containerBackground = new GestureDetector(
         onTap: () {
           setState(() {

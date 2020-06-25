@@ -209,7 +209,6 @@ class GameTable {
       }
       moveUpperNeighbor(selectedBlocks[i]);
     }
-
     moveColumns();
   }
 
